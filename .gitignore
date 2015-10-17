@@ -1,0 +1,6 @@
+/target/
+*.yml
+.DS_Store
+.classpath
+.project
+.settings
