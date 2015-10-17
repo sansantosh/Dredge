@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.dredgeplatform.dredge.clustermanagement.ClusterManager;
 import com.dredgeplatform.dredge.clustermanagement.WebserverManager;
+import com.dredgeplatform.dredge.jobmanagement.SchedulerManager;
 
 @Path("/dredge")
 public class ClusterService {
@@ -56,7 +57,40 @@ public class ClusterService {
         } catch (final Exception e) {
             return clusterName + " - " + e.getMessage();
         }
-
     }
 
+    @GET
+    @Path("/getSchedulerStatus/{clusterName}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getSchedulerStatus(@PathParam("clusterName") String clusterName) {
+        try {
+            return SchedulerManager.getSchedulerServerStatus(clusterName);
+        } catch (final Exception e) {
+            return clusterName + " - " + e.getMessage();
+        }
+    }
+
+    @GET
+    @Path("/startJob/{clusterName}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String startJob(@PathParam("clusterName") String clusterName) {
+        try {
+            SchedulerManager.startJob(clusterName);
+            return "Job Started";
+        } catch (final Exception e) {
+            return clusterName + " - " + e.getMessage();
+        }
+    }
+
+    @GET
+    @Path("/stopJob/{clusterName}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String stopJob(@PathParam("clusterName") String clusterName) {
+        try {
+            SchedulerManager.stopJob(clusterName);
+            return "Job Stopped";
+        } catch (final Exception e) {
+            return clusterName + " - " + e.getMessage();
+        }
+    }
 }

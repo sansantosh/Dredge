@@ -18,6 +18,8 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dredgeplatform.dredge.jobmanagement.SchedulerManager;
+
 public class ClusterManager {
     final static Logger log = LoggerFactory.getLogger(ClusterManager.class);
 
@@ -97,6 +99,22 @@ public class ClusterManager {
         }
     }
 
+    public static class SendStopClusterMessage implements IgniteRunnable {
+        private static final long serialVersionUID = 1L;
+        @IgniteInstanceResource
+        private transient Ignite ignite;
+
+        @Override
+        public void run() {
+            new Thread() {
+                @Override
+                public void run() {
+                    ignite.close();
+                }
+            }.start();
+        }
+    }
+
     public static void startWebserver(String clusterName, String port) throws Exception {
         log.debug("Starting WebServer on Cluster: {} at Port: {}", clusterName, port);
         final String separator = System.getProperty("file.separator");
@@ -115,20 +133,21 @@ public class ClusterManager {
         log.debug("Starting WebServer on Cluster: {} at Port: {} Process Started.", clusterName, port);
     }
 
-    public static class SendStopClusterMessage implements IgniteRunnable {
-        private static final long serialVersionUID = 1L;
-        @IgniteInstanceResource
-        private transient Ignite ignite;
+    public static void startSchedulerserver(String clusterName, String SchedulerThreads) throws Exception {
+        log.debug("Starting Schduler on Cluster: {} with Threads: {}", clusterName, SchedulerThreads);
+        final String separator = System.getProperty("file.separator");
+        final String classpath = System.getProperty("java.class.path");
+        final String path = String.format("%s%sbin%sjava", System.getProperty("java.home"), separator, separator);
 
-        @Override
-        public void run() {
-            new Thread() {
-                @Override
-                public void run() {
-                    ignite.close();
-                }
-            }.start();
-        }
+        final List<String> command = new ArrayList<String>();
+        command.add(path);
+        command.add("-cp");
+        command.add(classpath);
+        command.add(SchedulerManager.class.getName());
+        command.add(clusterName);
+        command.add(SchedulerThreads);
+        log.debug("Starting Schduler on Cluster: {} with Threads: {} Command: {}", clusterName, SchedulerThreads, command.toString());
+        new ProcessBuilder(command).start();
+        log.debug("Starting Schduler on Cluster: {} with Threads: {} Process Started.", clusterName, SchedulerThreads);
     }
-
 }

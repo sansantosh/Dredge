@@ -49,17 +49,22 @@
 
 	</appender>
 	
-	<!-- Send logs to both console and file audit -->
+	<!-- Send logs to both console and file audit 
+	
 	<logger name="com.dredgeplatform.dredge" level="info" additivity="false">
 		<appender-ref ref="FILE-AUDIT" />
 		<appender-ref ref="STDOUT" />
 	</logger>
-		
+		-->
 	<root level="info">
 		<appender-ref ref="FILE-AUDIT" />
 		<appender-ref ref="STDOUT" />
 	</root>
 
+	<root level="debug">
+		<appender-ref ref="FILE-AUDIT" />
+		<appender-ref ref="STDOUT" />
+	</root>
 	
 
 </configuration>

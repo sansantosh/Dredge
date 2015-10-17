@@ -57,6 +57,15 @@ public class DredgeAppStart {
         }
         log.info("Web Server Started");
 
+        // Start Scheduler Server and add instance to Scheduler Cluster.
+        log.info("Starting Scheduler Server...");
+        try {
+            ClusterManager.startSchedulerserver(props.get("schedulerClusterName").toString(), props.get("schedulerThreads").toString());
+        } catch (final Exception e) {
+            log.error("ERROR: Starting Scheduler. Message: {} Trace: {}", e.getMessage(), e.getStackTrace());
+        }
+        log.info("Scheduler Server Started");
+
         log.info("Dredge Startup Completed...");
         log.info("Dredge Available @ http://localhost:" + props.get("jettyPort").toString() + "/dredge");
 

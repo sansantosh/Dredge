@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dredgeplatform.dredge.clustermanagement.ClusterManager;
 import com.dredgeplatform.dredge.clustermanagement.WebserverManager;
+import com.dredgeplatform.dredge.jobmanagement.SchedulerManager;
 import com.dredgeplatform.dredge.lib.DredgeUtils;
 
 public class DredgeAppStop {
@@ -40,6 +41,18 @@ public class DredgeAppStop {
             System.out.println(WebserverManager.stopWebserver(props.get("webserverClusterName").toString()));
         } catch (final Exception e) {
             log.error("ERROR: Stopping Cluster:{}. Message: {} Trace: {}", props.get("webserverClusterName").toString(), e.getMessage(), e.getStackTrace());
+        }
+
+        try {
+            System.out.println(SchedulerManager.getSchedulerServerStatus(props.get("schedulerClusterName").toString()));
+        } catch (final Exception e) {
+            log.error("ERROR: Stopping Cluster:{}. Message: {} Trace: {}", props.get("schedulerClusterName").toString(), e.getMessage(), e.getStackTrace());
+        }
+
+        try {
+            System.out.println(SchedulerManager.stopScheduler(props.get("schedulerClusterName").toString()));
+        } catch (final Exception e) {
+            log.error("ERROR: Stopping Cluster:{}. Message: {} Trace: {}", props.get("schedulerClusterName").toString(), e.getMessage(), e.getStackTrace());
         }
 
         try {
