@@ -6,6 +6,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.dredgeplatform.dredge.clustermanagement.ClusterManager;
 import com.dredgeplatform.dredge.clustermanagement.WebserverManager;
 import com.dredgeplatform.dredge.jobmanagement.SchedulerManager;
@@ -16,8 +19,19 @@ public class ClusterService {
     @Path("/startCluster/{clusterName}/{nodesCnt}")
     @Produces(MediaType.TEXT_PLAIN)
     public String startCluster(@PathParam("clusterName") String clusterName, @PathParam("nodesCnt") int nodesCnt) throws Exception {
-        ClusterManager.startCluster(nodesCnt, clusterName);
-        return clusterName + "Started";
+        try {
+            final JSONObject jo = new JSONObject();
+            jo.put("status", ClusterManager.startCluster(nodesCnt, clusterName));
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        } catch (final Exception e) {
+            final JSONObject jo = new JSONObject();
+            jo.put("status", clusterName + " - " + e.getMessage());
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        }
     }
 
     @GET
@@ -25,27 +39,63 @@ public class ClusterService {
     @Produces(MediaType.TEXT_PLAIN)
     public String stopCluster(@PathParam("clusterName") String clusterName) {
         try {
-            ClusterManager.stopCluster(clusterName);
+            final JSONObject jo = new JSONObject();
+            jo.put("status", ClusterManager.stopCluster(clusterName));
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
         } catch (final Exception e) {
-            return e.toString();
+            final JSONObject jo = new JSONObject();
+            jo.put("status", clusterName + " - " + e.getMessage());
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
         }
-        return clusterName + "Stopped";
+    }
+
+    @GET
+    @Path("/getNodeCnt/{clusterName}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getNodeCnt(@PathParam("clusterName") String clusterName) {
+        try {
+            final JSONObject jo = new JSONObject();
+            jo.put("cnt", ClusterManager.getNodeCnt(clusterName));
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        } catch (final Exception e) {
+            final JSONObject jo = new JSONObject();
+            jo.put("cnt", clusterName + " - " + e.getMessage());
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        }
     }
 
     @GET
     @Path("/startWebserver/{clusterName}")
     @Produces(MediaType.TEXT_PLAIN)
     public String startWebserver(@PathParam("clusterName") String clusterName, @PathParam("nodesCnt") int nodesCnt) throws Exception {
-        WebserverManager.startWebserver(clusterName);
-        return clusterName + " - Webserver Started";
+        return WebserverManager.startWebserver(clusterName);
     }
 
     @GET
     @Path("/stopWebserver/{clusterName}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String stopWebserver(@PathParam("clusterName") String clusterName) throws Exception {
-        WebserverManager.stopWebserver(clusterName);
-        return clusterName + " - Webserver Stopped";
+    public String stopWebserver(@PathParam("clusterName") String clusterName) {
+        try {
+            final JSONObject jo = new JSONObject();
+            jo.put("status", WebserverManager.stopWebserver(clusterName));
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        } catch (final Exception e) {
+            final JSONObject jo = new JSONObject();
+            jo.put("status", clusterName + " - " + e.getMessage());
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        }
     }
 
     @GET
@@ -53,9 +103,57 @@ public class ClusterService {
     @Produces(MediaType.TEXT_PLAIN)
     public String getWebserverStatus(@PathParam("clusterName") String clusterName) {
         try {
-            return WebserverManager.getWebServerStatus(clusterName);
+            final JSONObject jo = new JSONObject();
+            jo.put("status", WebserverManager.getWebServerStatus(clusterName));
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
         } catch (final Exception e) {
-            return clusterName + " - " + e.getMessage();
+            final JSONObject jo = new JSONObject();
+            jo.put("status", clusterName + " - " + e.getMessage());
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        }
+    }
+
+    @GET
+    @Path("/startScheduler/{clusterName}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String startScheduler(@PathParam("clusterName") String clusterName) {
+        try {
+            final JSONObject jo = new JSONObject();
+            jo.put("status", SchedulerManager.startScheduler(clusterName));
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        } catch (final Exception e) {
+            final JSONObject jo = new JSONObject();
+            jo.put("status", clusterName + " - " + e.getMessage());
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        }
+    }
+
+    @GET
+    @Path("/stopScheduler/{clusterName}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String stopScheduler(@PathParam("clusterName") String clusterName) {
+        try {
+            final JSONObject jo = new JSONObject();
+            jo.put("status", SchedulerManager.stopScheduler(clusterName));
+
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+        } catch (final Exception e) {
+            final JSONObject jo = new JSONObject();
+            jo.put("status", clusterName + " - " + e.getMessage());
+
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
         }
     }
 
@@ -64,9 +162,22 @@ public class ClusterService {
     @Produces(MediaType.TEXT_PLAIN)
     public String getSchedulerStatus(@PathParam("clusterName") String clusterName) {
         try {
-            return SchedulerManager.getSchedulerServerStatus(clusterName);
+            final JSONObject jo = new JSONObject();
+            jo.put("status", SchedulerManager.getSchedulerServerStatus(clusterName));
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
+
+            // final JSONObject mainObj = new JSONObject();
+            // mainObj.put("dredge", ja);
+            // return mainObj.getJSONArray("dredge").toString();
+
         } catch (final Exception e) {
-            return clusterName + " - " + e.getMessage();
+            final JSONObject jo = new JSONObject();
+            jo.put("status", clusterName + " - " + e.getMessage());
+            final JSONArray ja = new JSONArray();
+            ja.put(jo);
+            return ja.toString();
         }
     }
 

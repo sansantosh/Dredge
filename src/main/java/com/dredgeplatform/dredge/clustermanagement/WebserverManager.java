@@ -42,7 +42,7 @@ public class WebserverManager {
         if (!schSrvc.getWebserverStatus().equals("STARTED")) {
             schSrvc.startWebserver();
         }
-        status = "Webserver " + schSrvc.getWebserverStatus();
+        status = schSrvc.getWebserverStatus();
 
         if (ignite.configuration().isClientMode()) {
             ignite.close();
@@ -62,7 +62,7 @@ public class WebserverManager {
         while (!schSrvc.getWebserverStatus().equals("STOPPED")) {
             log.warn("Waiting for Webserver to Stop...");
         }
-        status = "Webserver " + schSrvc.getWebserverStatus();
+        status = schSrvc.getWebserverStatus();
 
         if (ignite.configuration().isClientMode()) {
             ignite.close();
@@ -76,7 +76,7 @@ public class WebserverManager {
         final ClusterGroup remoteGroup = ignite.cluster().forAttribute("ROLE", clusterName);
         final WebserverService schSrvc = ignite.services(remoteGroup).serviceProxy("DredgeWebserver", WebserverService.class, false);
 
-        status = "Webserver " + schSrvc.getWebserverStatus() + " " + ignite.configuration().isClientMode();
+        status = schSrvc.getWebserverStatus();
 
         if (ignite.configuration().isClientMode()) {
             ignite.close();

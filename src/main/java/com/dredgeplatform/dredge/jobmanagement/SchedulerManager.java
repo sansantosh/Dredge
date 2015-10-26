@@ -45,7 +45,7 @@ public class SchedulerManager {
         if (!schSrvc.getSchedulerStatus().equals("Started")) {
             schSrvc.startScheduler();
         }
-        status = "Scheduler Server " + schSrvc.getSchedulerStatus();
+        status = schSrvc.getSchedulerStatus();
 
         if (ignite.configuration().isClientMode()) {
             ignite.close();
@@ -66,7 +66,7 @@ public class SchedulerManager {
             log.warn(schSrvc.getSchedulerStatus());
             log.warn("Waiting for Scheduler to Stop...");
         }
-        status = "Scheduler " + schSrvc.getSchedulerStatus();
+        status = schSrvc.getSchedulerStatus();
 
         if (ignite.configuration().isClientMode()) {
             ignite.close();
@@ -80,7 +80,7 @@ public class SchedulerManager {
         final ClusterGroup remoteGroup = ignite.cluster().forAttribute("ROLE", clusterName);
         final SchedulerService schSrvc = ignite.services(remoteGroup).serviceProxy("DredgeSchdulerServer", SchedulerService.class, false);
 
-        status = "Scheduler " + schSrvc.getSchedulerStatus();
+        status = schSrvc.getSchedulerStatus();
 
         if (ignite.configuration().isClientMode()) {
             ignite.close();

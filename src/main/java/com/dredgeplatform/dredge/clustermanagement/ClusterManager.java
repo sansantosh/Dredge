@@ -10,6 +10,7 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCompute;
 import org.apache.ignite.IgniteState;
 import org.apache.ignite.Ignition;
+import org.apache.ignite.cluster.ClusterGroup;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.lang.IgniteRunnable;
 import org.apache.ignite.resources.IgniteInstanceResource;
@@ -40,7 +41,7 @@ public class ClusterManager {
         }
     }
 
-    public static void startCluster(int cntNodes, String clusterName) {
+    public static String startCluster(int cntNodes, String clusterName) {
         log.debug("Cluster Initialize: {}", clusterName);
         for (int i = 0; i < cntNodes; i++) {
             try {
@@ -60,12 +61,13 @@ public class ClusterManager {
                 log.debug("Starting Cluster: {} Node: {} Process Started.", clusterName, i);
             } catch (final Exception e) {
                 log.error("ERROR: Cluster: {} Node: {} Trace: {}", clusterName, i, e.getStackTrace());
+                return String.format("ERROR: Cluster: %s Node: %s Trace: %s", clusterName, i, e.getStackTrace());
             }
         }
-
+        return "Request Executed";
     }
 
-    public static void stopCluster(String clusterName) {
+    public static String stopCluster(String clusterName) {
         try {
             log.debug("Stoping Cluster: {} ", clusterName);
             final Ignite ignite = getIgnite();
@@ -76,7 +78,25 @@ public class ClusterManager {
                 ignite.close();
             }
         } catch (final Exception e) {
-            log.error("ERROR: Cluster {}  Trace: {}", clusterName, e.getStackTrace());
+            log.error("ERROR: Cluster {}  Trace: {}", clusterName, e.getMessage());
+            return String.format("ERROR: Cluster: %s  Trace: %s", clusterName, e.getMessage());
+        }
+        return "Request Executed";
+    }
+
+    public static String getNodeCnt(String clusterName) {
+        try {
+            String nodeCnt;
+            final Ignite ignite = ClusterManager.getIgnite();
+            final ClusterGroup remoteGroup = ignite.cluster().forAttribute("ROLE", clusterName);
+            nodeCnt = String.valueOf(remoteGroup.metrics().getTotalNodes());
+            if (ignite.configuration().isClientMode()) {
+                ignite.close();
+            }
+            return nodeCnt;
+        } catch (final Exception e) {
+            log.error("ERROR: Cluster {}  Trace: {}", clusterName, e.getMessage());
+            return String.format("ERROR: Cluster: %s  Trace: %s", clusterName, e.getMessage());
         }
     }
 
@@ -150,4 +170,5 @@ public class ClusterManager {
         new ProcessBuilder(command).start();
         log.debug("Starting Schduler on Cluster: {} with Threads: {} Process Started.", clusterName, SchedulerThreads);
     }
+
 }

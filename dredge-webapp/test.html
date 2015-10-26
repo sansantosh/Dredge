@@ -1,0 +1,20 @@
+
+	
+	
+
+	
+		
+		<p>Enter your Name: <input type="text" ng-model="name"></p>
+		<p>Hello <span ng-bind="name"></span>!</p>
+		
+		<input type="checkbox" ng-model="enableDisableButton">Disable Button 
+		<button ng-disabled="enableDisableButton">Click Me!</button>
+		
+		
+		<input type="checkbox" ng-model="showHide1">Show Button <button ng-show="showHide1">Click Me!</button>
+		
+		<p>Total click: {{ clickCounter }}</p></td>
+<button ng-click="clickCounter = clickCounter + 1">Click Me!</button>
+
+
+	</div>

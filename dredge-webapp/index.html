@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Dredge : Data Platform Simplified</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="css/dredgemain.css" type="text/css" media="screen" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		
+		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular.min.js"></script>
+		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-touch.min.js"></script>
+		<script src="js/dredge.angular.js"></script>
+		<script src="js/dredge.d3.js"></script>
+		
+		
+		<script src="js/d3.min.js" charset="utf-8"></script>
+	</head>
+	<body  ng-app="dredge-app">
+	<div ng-include src="'header.html'" ></div>
+		
+		<div ng-controller="ClusterMetrics" >
+			<h2>{{cluster.title}}</h2>
+		</div>	
+   		
+   		<div id="divhead" style="height: 200px;">
+   		
+   		   <div id="divcell" style="width: 15%; height: 200px;" class="chart1" >
+   	          <b>Webserver Status</b> 
+   	            <br><br>
+              	<div  ng-controller="services" ng-init="getWebserverStatus()">
+              	<br>
+				</div>
+            </div>
+   	      
+			<div id="divcell" style="width: 15%; height: 200px;" class="wsNodeCnt">
+   	          <b>Webserver Cluster Nodes</b> 
+   	            <br>
+   	            <div  ng-controller="services" ng-init="getWebserverNodesCnt()">
+   	            <input type="text" ng-model="nodes" style="width:20px" >
+              	<button ng-click='addNodes("dredgeWebserver");'  style="width: 50px">Add</button><br> 
+   	         	<br>
+             	</div>
+             </div>
+				
+           	<div id="divcell" style="width: 15%; height: 200px;" class="cNodeCnt">
+   	          <b>Compute Cluster Nodes</b> 
+   	            <br>
+              	<div  ng-controller="services" ng-init="getComputeNodesCnt()">
+              	<input type="text" ng-model="nodes" style="width:20px" >              	
+              	<button ng-click='addNodes("dredgeCompute");'  style="width: 50px">Add</button><br> 
+              	<button ng-click='stopCluster("dredgeCompute");'  ng-show="showComputeNodes" style="width: 100px">Stop</button> 
+             	<br>
+             	</div>
+             </div>
+            
+            <div id="divcell" style="width: 15%; height: 200px;" class="schNodeCnt">
+   	          <b>Scheduler Cluster Nodes</b> 
+   	            <br>
+              	<div  ng-controller="services" ng-init="getSchedulerNodesCnt()">
+              	<input type="text" ng-model="nodes" style="width:20px" >
+              	<button ng-click='addNodes("dredgeScheduler");'  style="width: 50px">Add</button><br> 
+              	<button ng-click='stopCluster("dredgeScheduler");'  ng-show="showSchedulerNodes" style="width: 100px">Stop</button>
+             	<br>
+             	</div>
+             </div>
+            
+            <div id="divcell" style="width: 15%; height: 200px;" class="chart" >
+   	          <b>Scheduler Status</b> 
+   	            <br><br>
+              	<div  ng-controller="services" ng-init="getSchedulerStatus()">
+					<button ng-click='startScheduler()' ng-show="showSchedulerStartbtn" style="width: 100px;">Start</button> 
+	   				<button ng-click='stopScheduler()'  ng-show="showSchedulerStopbtn" style="width: 100px">Stop</button> 
+				</div>
+            </div>
+            
+     </div>
+   
+</body>
+</html>
