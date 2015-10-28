@@ -1,4 +1,4 @@
-package com.dredgeplatform.dredge.services;
+package com.dredgeplatform.dredge.clustermanagement;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -9,9 +9,8 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.dredgeplatform.dredge.clustermanagement.ClusterManager;
-import com.dredgeplatform.dredge.clustermanagement.WebserverManager;
-import com.dredgeplatform.dredge.jobmanagement.SchedulerManager;
+import com.dredgeplatform.dredge.scheduler.SchedulerServiceManager;
+import com.dredgeplatform.dredge.webserver.WebserverServiceManager;
 
 @Path("/dredge")
 public class ClusterService {
@@ -76,7 +75,7 @@ public class ClusterService {
     @Path("/startWebserver/{clusterName}")
     @Produces(MediaType.TEXT_PLAIN)
     public String startWebserver(@PathParam("clusterName") String clusterName, @PathParam("nodesCnt") int nodesCnt) throws Exception {
-        return WebserverManager.startWebserver(clusterName);
+        return WebserverServiceManager.startWebserver(clusterName);
     }
 
     @GET
@@ -85,7 +84,7 @@ public class ClusterService {
     public String stopWebserver(@PathParam("clusterName") String clusterName) {
         try {
             final JSONObject jo = new JSONObject();
-            jo.put("status", WebserverManager.stopWebserver(clusterName));
+            jo.put("status", WebserverServiceManager.stopWebserver(clusterName));
             final JSONArray ja = new JSONArray();
             ja.put(jo);
             return ja.toString();
@@ -104,7 +103,7 @@ public class ClusterService {
     public String getWebserverStatus(@PathParam("clusterName") String clusterName) {
         try {
             final JSONObject jo = new JSONObject();
-            jo.put("status", WebserverManager.getWebServerStatus(clusterName));
+            jo.put("status", WebserverServiceManager.getWebServerStatus(clusterName));
             final JSONArray ja = new JSONArray();
             ja.put(jo);
             return ja.toString();
@@ -123,7 +122,7 @@ public class ClusterService {
     public String startScheduler(@PathParam("clusterName") String clusterName) {
         try {
             final JSONObject jo = new JSONObject();
-            jo.put("status", SchedulerManager.startScheduler(clusterName));
+            jo.put("status", SchedulerServiceManager.startScheduler(clusterName));
             final JSONArray ja = new JSONArray();
             ja.put(jo);
             return ja.toString();
@@ -142,7 +141,7 @@ public class ClusterService {
     public String stopScheduler(@PathParam("clusterName") String clusterName) {
         try {
             final JSONObject jo = new JSONObject();
-            jo.put("status", SchedulerManager.stopScheduler(clusterName));
+            jo.put("status", SchedulerServiceManager.stopScheduler(clusterName));
 
             final JSONArray ja = new JSONArray();
             ja.put(jo);
@@ -163,7 +162,7 @@ public class ClusterService {
     public String getSchedulerStatus(@PathParam("clusterName") String clusterName) {
         try {
             final JSONObject jo = new JSONObject();
-            jo.put("status", SchedulerManager.getSchedulerServerStatus(clusterName));
+            jo.put("status", SchedulerServiceManager.getSchedulerServerStatus(clusterName));
             final JSONArray ja = new JSONArray();
             ja.put(jo);
             return ja.toString();
@@ -186,7 +185,7 @@ public class ClusterService {
     @Produces(MediaType.TEXT_PLAIN)
     public String startJob(@PathParam("clusterName") String clusterName) {
         try {
-            SchedulerManager.startJob(clusterName);
+            SchedulerServiceManager.startJob(clusterName);
             return "Job Started";
         } catch (final Exception e) {
             return clusterName + " - " + e.getMessage();
@@ -198,7 +197,7 @@ public class ClusterService {
     @Produces(MediaType.TEXT_PLAIN)
     public String stopJob(@PathParam("clusterName") String clusterName) {
         try {
-            SchedulerManager.stopJob(clusterName);
+            SchedulerServiceManager.stopJob(clusterName);
             return "Job Stopped";
         } catch (final Exception e) {
             return clusterName + " - " + e.getMessage();

@@ -1,4 +1,4 @@
-package com.dredgeplatform.dredge.clustermanagement;
+package com.dredgeplatform.dredge.webserver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,8 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.apache.ignite.Ignite;
-import org.apache.ignite.resources.IgniteInstanceResource;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
 import org.eclipse.jetty.server.Handler;
@@ -23,14 +21,12 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dredgeplatform.dredge.services.ClusterService;
+import com.dredgeplatform.dredge.clustermanagement.ClusterService;
 
 public class WebserverServiceimpl implements Service, WebserverService {
     private static final long serialVersionUID = 1L;
     final static Logger log = LoggerFactory.getLogger(WebserverServiceimpl.class);
 
-    @IgniteInstanceResource
-    private Ignite ignite;
     public String clusterName;
     public int port;
     public static Server jettyServer;
@@ -97,18 +93,6 @@ public class WebserverServiceimpl implements Service, WebserverService {
     }
 
     @Override
-    public String getWebserverStatus() {
-        String status;
-        try {
-            status = jettyServer.getState();
-        } catch (final Exception e) {
-            log.warn("Jetty Server is Stopped...");
-            status = "STOPPED";
-        }
-        return status;
-    }
-
-    @Override
     public void stopWebserver() throws UnknownHostException, IOException {
         final Socket s = new Socket(InetAddress.getByName("127.0.0.1"), 8079);
         final OutputStream out = s.getOutputStream();
@@ -151,6 +135,18 @@ public class WebserverServiceimpl implements Service, WebserverService {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public String getWebserverStatus() {
+        String status;
+        try {
+            status = jettyServer.getState();
+        } catch (final Exception e) {
+            log.warn("Jetty Server is Stopped...");
+            status = "STOPPED";
+        }
+        return status;
     }
 
 }

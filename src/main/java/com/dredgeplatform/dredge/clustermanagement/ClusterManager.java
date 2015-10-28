@@ -1,5 +1,6 @@
 package com.dredgeplatform.dredge.clustermanagement;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,19 +20,23 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dredgeplatform.dredge.jobmanagement.SchedulerManager;
+import com.dredgeplatform.dredge.auditor.AuditorServiceManager;
+import com.dredgeplatform.dredge.scheduler.SchedulerServiceManager;
+import com.dredgeplatform.dredge.webserver.WebserverServiceManager;
 
 public class ClusterManager {
     final static Logger log = LoggerFactory.getLogger(ClusterManager.class);
+    public static String clusterAddresses;
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            log.error("ERROR: Invalid Arguments. Usage StartCluster ClusterName");
+        if (args.length != 2) {
+            log.error("ERROR: Invalid Arguments. Usage ClusterManager ClusterName clusterAddresses");
             System.exit(1);
         }
         try {
-            log.debug("Cluster Name: {}", args[0]);
+            log.debug("Cluster Name: {} ", args[0]);
             final String clusterName = args[0];
+            clusterAddresses = args[1];
             final IgniteConfiguration cfg = new IgniteConfiguration();
             final Map<String, String> attrs = Collections.singletonMap("ROLE", clusterName);
             cfg.setUserAttributes(attrs);
@@ -56,6 +61,7 @@ public class ClusterManager {
                 command.add(classpath);
                 command.add(ClusterManager.class.getName());
                 command.add(clusterName);
+                command.add(clusterAddresses);
                 log.debug("Starting Cluster: {} Node: {} Command: {}", clusterName, i, command.toString());
                 new ProcessBuilder(command).start();
                 log.debug("Starting Cluster: {} Node: {} Process Started.", clusterName, i);
@@ -84,26 +90,11 @@ public class ClusterManager {
         return "Request Executed";
     }
 
-    public static String getNodeCnt(String clusterName) {
-        try {
-            String nodeCnt;
-            final Ignite ignite = ClusterManager.getIgnite();
-            final ClusterGroup remoteGroup = ignite.cluster().forAttribute("ROLE", clusterName);
-            nodeCnt = String.valueOf(remoteGroup.metrics().getTotalNodes());
-            if (ignite.configuration().isClientMode()) {
-                ignite.close();
-            }
-            return nodeCnt;
-        } catch (final Exception e) {
-            log.error("ERROR: Cluster {}  Trace: {}", clusterName, e.getMessage());
-            return String.format("ERROR: Cluster: %s  Trace: %s", clusterName, e.getMessage());
-        }
-    }
-
     private static Ignite startNode(IgniteConfiguration cfg) {
+        log.debug("Start Node clusterAddresses " + clusterAddresses);
         final TcpDiscoverySpi spi = new TcpDiscoverySpi();
         final TcpDiscoveryVmIpFinder ipFinder = new TcpDiscoveryVmIpFinder();
-        ipFinder.setAddresses(Arrays.asList("127.0.0.1:47500..47509"));
+        ipFinder.setAddresses(Arrays.asList(clusterAddresses));
         spi.setIpFinder(ipFinder);
         cfg.setDiscoverySpi(spi);
         return Ignition.start(cfg);
@@ -135,7 +126,23 @@ public class ClusterManager {
         }
     }
 
-    public static void startWebserver(String clusterName, String port) throws Exception {
+    public static String getNodeCnt(String clusterName) {
+        try {
+            String nodeCnt;
+            final Ignite ignite = ClusterManager.getIgnite();
+            final ClusterGroup remoteGroup = ignite.cluster().forAttribute("ROLE", clusterName);
+            nodeCnt = String.valueOf(remoteGroup.metrics().getTotalNodes());
+            if (ignite.configuration().isClientMode()) {
+                ignite.close();
+            }
+            return nodeCnt;
+        } catch (final Exception e) {
+            log.error("ERROR: Cluster {}  Trace: {}", clusterName, e.getMessage());
+            return String.format("ERROR: Cluster: %s  Trace: %s", clusterName, e.getMessage());
+        }
+    }
+
+    public static void startWebserverService(String clusterName, String port) throws Exception {
         log.debug("Starting WebServer on Cluster: {} at Port: {}", clusterName, port);
         final String separator = System.getProperty("file.separator");
         final String classpath = System.getProperty("java.class.path");
@@ -145,15 +152,16 @@ public class ClusterManager {
         command.add(path);
         command.add("-cp");
         command.add(classpath);
-        command.add(WebserverManager.class.getName());
+        command.add(WebserverServiceManager.class.getName());
         command.add(clusterName);
         command.add(port);
+        command.add(clusterAddresses);
         log.debug("Starting WebServer on Cluster: {} at Port: {} Command: {}", clusterName, port, command.toString());
         new ProcessBuilder(command).start();
         log.debug("Starting WebServer on Cluster: {} at Port: {} Process Started.", clusterName, port);
     }
 
-    public static void startSchedulerserver(String clusterName, String SchedulerThreads) throws Exception {
+    public static void startSchedulerService(String clusterName, String SchedulerThreads) throws Exception {
         log.debug("Starting Schduler on Cluster: {} with Threads: {}", clusterName, SchedulerThreads);
         final String separator = System.getProperty("file.separator");
         final String classpath = System.getProperty("java.class.path");
@@ -163,12 +171,32 @@ public class ClusterManager {
         command.add(path);
         command.add("-cp");
         command.add(classpath);
-        command.add(SchedulerManager.class.getName());
+        command.add(SchedulerServiceManager.class.getName());
         command.add(clusterName);
         command.add(SchedulerThreads);
+        command.add(clusterAddresses);
         log.debug("Starting Schduler on Cluster: {} with Threads: {} Command: {}", clusterName, SchedulerThreads, command.toString());
         new ProcessBuilder(command).start();
         log.debug("Starting Schduler on Cluster: {} with Threads: {} Process Started.", clusterName, SchedulerThreads);
+    }
+
+    public static void startAuditorSerivce(String loggerName, String brokerList) throws IOException {
+        log.debug("Auditor LoggerName: {} BrokerList: {}", loggerName, brokerList);
+        final String separator = System.getProperty("file.separator");
+        final String classpath = System.getProperty("java.class.path");
+        final String path = String.format("%s%sbin%sjava", System.getProperty("java.home"), separator, separator);
+
+        final List<String> command = new ArrayList<String>();
+        command.add(path);
+        command.add("-cp");
+        command.add(classpath);
+        command.add(AuditorServiceManager.class.getName());
+        command.add(loggerName);
+        command.add(brokerList);
+        command.add(clusterAddresses);
+        log.debug("Starting Auditor loggerName: {} with brokerList: {} Command: {}", loggerName, brokerList, command.toString());
+        new ProcessBuilder(command).start();
+        log.debug("Starting Auditor loggerName: {} with brokerList: {} Process Started.", loggerName, brokerList);
     }
 
 }

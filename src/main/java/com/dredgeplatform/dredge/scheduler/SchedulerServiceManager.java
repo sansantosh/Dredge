@@ -1,4 +1,4 @@
-package com.dredgeplatform.dredge.jobmanagement;
+package com.dredgeplatform.dredge.scheduler;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -10,19 +10,20 @@ import org.slf4j.LoggerFactory;
 
 import com.dredgeplatform.dredge.clustermanagement.ClusterManager;
 
-public class SchedulerManager {
-    final static Logger log = LoggerFactory.getLogger(SchedulerManager.class);
+public class SchedulerServiceManager {
+    final static Logger log = LoggerFactory.getLogger(SchedulerServiceManager.class);
 
     public static void main(String[] args) throws NumberFormatException, IgniteException, Exception {
-        if (args.length != 2) {
-            log.error("ERROR: Invalid Arguments. Usage SchedulerManager ClusterName SchedulerThreads");
+        if (args.length != 3) {
+            log.error("ERROR: Invalid Arguments. Usage SchedulerManager ClusterName SchedulerThreads clusterAddresses");
             System.exit(1);
         }
 
         try {
-            log.debug("Cluster Name: {} with Threads: {}", args[0], args[1]);
+            log.debug("Cluster Name: {} with Threads: {} clusterAddresses: {}", args[0], args[1], args[2]);
             final String clusterName = args[0];
             final String SchedulerThreads = args[1];
+            ClusterManager.clusterAddresses = args[2];
 
             final Ignite ignite = ClusterManager.getIgnite();
             final ClusterGroup remoteGroup = ignite.cluster().forAttribute("ROLE", clusterName);

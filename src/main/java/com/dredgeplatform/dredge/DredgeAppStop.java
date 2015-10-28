@@ -6,10 +6,11 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dredgeplatform.dredge.auditor.AuditorServiceManager;
 import com.dredgeplatform.dredge.clustermanagement.ClusterManager;
-import com.dredgeplatform.dredge.clustermanagement.WebserverManager;
-import com.dredgeplatform.dredge.jobmanagement.SchedulerManager;
 import com.dredgeplatform.dredge.lib.DredgeUtils;
+import com.dredgeplatform.dredge.scheduler.SchedulerServiceManager;
+import com.dredgeplatform.dredge.webserver.WebserverServiceManager;
 
 public class DredgeAppStop {
     final static Logger log = LoggerFactory.getLogger(DredgeAppStop.class);
@@ -20,8 +21,10 @@ public class DredgeAppStop {
         log.info("|     \\ |_____/ |______ |     \\ |  ____ |______");
         log.info("|_____/ |    \\_ |______ |_____/ |_____| |______");
         log.info("Stopping Dredge Server...");
+
         if (args.length != 1) {
             propertiesPath = "./src/main/resources/dredge.properties";
+            log.info("dredge.properties file not provided, using default properties...");
         } else {
             propertiesPath = args[0];
         }
@@ -31,28 +34,24 @@ public class DredgeAppStop {
             log.debug("Dredge Property Key : {} - Value {}", e.getKey(), e.getValue());
         }
 
+        ClusterManager.clusterAddresses = props.get("clusterAddresses").toString();
+
         try {
-            System.out.println(WebserverManager.getWebServerStatus(props.get("webserverClusterName").toString()));
+            System.out.println(WebserverServiceManager.stopWebserver(props.get("webserverClusterName").toString()));
         } catch (final Exception e) {
-            log.error("ERROR: Stopping Cluster:{}. Message: {} Trace: {}", props.get("webserverClusterName").toString(), e.getMessage(), e.getStackTrace());
+            log.error("ERROR: Stopping Webserver:{}. Message: {} Trace: {}", props.get("webserverClusterName").toString(), e.getMessage(), e.getStackTrace());
         }
 
         try {
-            System.out.println(WebserverManager.stopWebserver(props.get("webserverClusterName").toString()));
+            System.out.println(SchedulerServiceManager.stopScheduler(props.get("schedulerClusterName").toString()));
         } catch (final Exception e) {
-            log.error("ERROR: Stopping Cluster:{}. Message: {} Trace: {}", props.get("webserverClusterName").toString(), e.getMessage(), e.getStackTrace());
+            log.error("ERROR: Stopping Scheduler:{}. Message: {} Trace: {}", props.get("schedulerClusterName").toString(), e.getMessage(), e.getStackTrace());
         }
 
         try {
-            System.out.println(SchedulerManager.getSchedulerServerStatus(props.get("schedulerClusterName").toString()));
+            AuditorServiceManager.stopAuditor(props.get("auditorTopicName").toString());
         } catch (final Exception e) {
-            log.error("ERROR: Stopping Cluster:{}. Message: {} Trace: {}", props.get("schedulerClusterName").toString(), e.getMessage(), e.getStackTrace());
-        }
-
-        try {
-            System.out.println(SchedulerManager.stopScheduler(props.get("schedulerClusterName").toString()));
-        } catch (final Exception e) {
-            log.error("ERROR: Stopping Cluster:{}. Message: {} Trace: {}", props.get("schedulerClusterName").toString(), e.getMessage(), e.getStackTrace());
+            log.error("ERROR: Stopping Auditor:{}. Message: {} Trace: {}", props.get("auditorTopicName").toString(), e.getMessage(), e.getStackTrace());
         }
 
         try {
@@ -70,6 +69,7 @@ public class DredgeAppStop {
         } catch (final Exception e) {
             log.error("ERROR: Stopping Cluster:{}. Message: {} Trace: {}", props.get("webserverClusterName").toString(), e.getMessage(), e.getStackTrace());
         }
+
     }
 
 }

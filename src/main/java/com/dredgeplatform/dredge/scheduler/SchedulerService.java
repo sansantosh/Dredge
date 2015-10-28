@@ -1,4 +1,4 @@
-package com.dredgeplatform.dredge.jobmanagement;
+package com.dredgeplatform.dredge.scheduler;
 
 import org.quartz.SchedulerException;
 

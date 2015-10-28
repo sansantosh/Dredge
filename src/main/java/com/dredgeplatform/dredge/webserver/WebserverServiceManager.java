@@ -1,4 +1,4 @@
-package com.dredgeplatform.dredge.clustermanagement;
+package com.dredgeplatform.dredge.webserver;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -7,19 +7,22 @@ import org.apache.ignite.cluster.ClusterGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebserverManager {
-    final static Logger log = LoggerFactory.getLogger(WebserverManager.class);
+import com.dredgeplatform.dredge.clustermanagement.ClusterManager;
+
+public class WebserverServiceManager {
+    final static Logger log = LoggerFactory.getLogger(WebserverServiceManager.class);
 
     public static void main(String[] args) throws NumberFormatException, IgniteException, Exception {
-        if (args.length != 2) {
-            log.error("ERROR: Invalid Arguments. Usage WebserverManager ClusterName port");
+        if (args.length != 3) {
+            log.error("ERROR: Invalid Arguments. Usage WebserverManager ClusterName port clusterAddresses");
             System.exit(1);
         }
 
         try {
-            log.debug("Cluster Name: {} Port: {}", args[0], args[1]);
+            log.debug("Cluster Name: {} Port: {} clusterAddresses: {}", args[0], args[1], args[2]);
             final String clusterName = args[0];
             final int port = Integer.parseInt(args[1]);
+            ClusterManager.clusterAddresses = args[2];
 
             final Ignite ignite = ClusterManager.getIgnite();
             final ClusterGroup remoteGroup = ignite.cluster().forAttribute("ROLE", clusterName);

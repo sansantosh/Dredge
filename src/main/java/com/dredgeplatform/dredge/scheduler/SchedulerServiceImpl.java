@@ -1,4 +1,4 @@
-package com.dredgeplatform.dredge.jobmanagement;
+package com.dredgeplatform.dredge.scheduler;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.JobKey.jobKey;
@@ -7,8 +7,6 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 import java.util.Properties;
 
-import org.apache.ignite.Ignite;
-import org.apache.ignite.resources.IgniteInstanceResource;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceContext;
 import org.quartz.JobDetail;
@@ -23,8 +21,6 @@ public class SchedulerServiceImpl implements Service, SchedulerService {
     private static final Logger log = LoggerFactory.getLogger(SchedulerServiceImpl.class);
     private static final long serialVersionUID = 1L;
 
-    @IgniteInstanceResource
-    private Ignite ignite;
     private Scheduler scheduler;
     public String clusterName;
     public String schedulerThreads;
@@ -75,11 +71,11 @@ public class SchedulerServiceImpl implements Service, SchedulerService {
 
     @Override
     public void stopScheduler() throws SchedulerException {
-        log.warn("Shutting Schduler Server");
+        log.warn("Stopping Schduler Server");
         if (!scheduler.isShutdown()) {
             scheduler.shutdown();
         }
-        log.warn("Shutting Scheduler Server Done");
+        log.warn("Scheduler Server Stopped.");
     }
 
     @Override
@@ -91,7 +87,6 @@ public class SchedulerServiceImpl implements Service, SchedulerService {
             } else {
                 status = "Started";
             }
-
         } catch (final Exception e) {
             log.warn("Scheduler Server is Stopped...");
             status = "Stopped";

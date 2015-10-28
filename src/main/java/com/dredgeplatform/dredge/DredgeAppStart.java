@@ -14,28 +14,26 @@ public class DredgeAppStart {
     static String propertiesPath;
 
     public static void main(final String[] args) throws Exception {
-        if (args.length != 1) {
-            propertiesPath = "./src/main/resources/dredge.properties";
-        } else {
-            propertiesPath = args[0];
-        }
-
         log.info("______   ______  ______ ______  ______   ______");
         log.info("|     \\ |_____/ |______ |     \\ |  ____ |______");
         log.info("|_____/ |    \\_ |______ |_____/ |_____| |______");
 
         log.info("Starting Dredge Server...");
 
-        // Read Dredge Properties
+        if (args.length != 1) {
+            propertiesPath = "./src/main/resources/dredge.properties";
+            log.info("dredge.properties file not provided, using default properties...");
+        } else {
+            propertiesPath = args[0];
+        }
+
         final Properties props = DredgeUtils.readDredgeProperties(propertiesPath);
         for (final Entry<Object, Object> e : props.entrySet()) {
             log.debug("Dredge Property Key : {} - Value {}", e.getKey(), e.getValue());
         }
 
-        // Start Dredge as a Cluster App.
-        // Compute Cluster for Tasks Processing
-        // Scheduler Cluster for Distributed Quatz Instance
-        // WebServer Cluster for Dustributed Jetty Instance
+        ClusterManager.clusterAddresses = props.get("clusterAddresses").toString();
+
         log.info("Starting Compute Cluster: {} Nodes: {}", props.get("computeClusterName").toString(), props.get("computeClusterNodes").toString());
         ClusterManager.startCluster(Integer.parseInt(props.get("computeClusterNodes").toString()), props.get("computeClusterName").toString());
 
@@ -45,29 +43,31 @@ public class DredgeAppStart {
         log.info("Starting Webserver Cluster: {} Nodes: {}", props.get("webserverClusterName").toString(), props.get("webserverClusterNodes").toString());
         ClusterManager.startCluster(Integer.parseInt(props.get("webserverClusterNodes").toString()), props.get("webserverClusterName").toString());
 
-        // status = ClusterManager.startCluster(1, "test");
-        // log.debug(status + "=================================");
-
-        // Start Jetty Server and add instance to Webserver Cluster.
         log.info("Starting Web Server...");
         try {
-            ClusterManager.startWebserver(props.get("webserverClusterName").toString(), props.get("jettyPort").toString());
+            ClusterManager.startWebserverService(props.get("webserverClusterName").toString(), props.get("jettyPort").toString());
         } catch (final Exception e) {
             log.error("ERROR: Starting WebServer. Message: {} Trace: {}", e.getMessage(), e.getStackTrace());
         }
         log.info("Web Server Started");
 
-        // Start Scheduler Server and add instance to Scheduler Cluster.
         log.info("Starting Scheduler Server...");
         try {
-            ClusterManager.startSchedulerserver(props.get("schedulerClusterName").toString(), props.get("schedulerThreads").toString());
+            ClusterManager.startSchedulerService(props.get("schedulerClusterName").toString(), props.get("schedulerThreads").toString());
         } catch (final Exception e) {
             log.error("ERROR: Starting Scheduler. Message: {} Trace: {}", e.getMessage(), e.getStackTrace());
         }
         log.info("Scheduler Server Started");
 
-        log.info("Dredge Startup Completed...");
-        log.info("Dredge Available @ http://localhost:" + props.get("jettyPort").toString() + "/dredge");
+        log.info("Starting Auditor");
+        try {
+            ClusterManager.startAuditorSerivce(props.get("auditorTopicName").toString(), props.get("kafkaBrokerList").toString());
+        } catch (final Exception e) {
+            log.error("ERROR: Starting Auditor. Message: {} Trace: {}", e.getMessage(), e.getStackTrace());
+        }
+        log.info("Auditor Started");
 
+        log.info("Dredge Startup Completed...");
+        log.info("Dredge Available @ http://localhost:" + props.get("jettyPort").toString() + "/dredge/");
     }
 }
