@@ -77,6 +77,10 @@ public class ClusterManager {
         try {
             log.debug("Stoping Cluster: {} ", clusterName);
             final Ignite ignite = getIgnite();
+            // For some reason it is canceling all the services on all the
+            // nodes
+            // ignite.services(ignite.cluster().forAttribute("ROLE",
+            // clusterName)).cancelAll();
             final IgniteCompute compute = ignite.compute(ignite.cluster().forAttribute("ROLE", clusterName));
             compute.broadcast(new ClusterManager.SendStopClusterMessage());
             log.debug("Stoping Cluster: {} Message Brodcasted.", clusterName);

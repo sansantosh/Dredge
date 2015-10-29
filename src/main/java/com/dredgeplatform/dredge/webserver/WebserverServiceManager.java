@@ -45,6 +45,10 @@ public class WebserverServiceManager {
         if (!schSrvc.getWebserverStatus().equals("STARTED")) {
             schSrvc.startWebserver();
         }
+        while (!schSrvc.getWebserverStatus().equals("STARTED")) {
+            log.info("Waiting for Webserver to Start...");
+        }
+
         status = schSrvc.getWebserverStatus();
 
         if (ignite.configuration().isClientMode()) {

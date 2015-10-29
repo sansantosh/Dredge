@@ -87,9 +87,6 @@ public class WebserverServiceimpl implements Service, WebserverService {
 
         new JettyStopThread().start();
         jettyServer.start();
-        while (!jettyServer.getState().equals("STARTED")) {
-            log.warn("Waiting for Webserver to Start...");
-        }
     }
 
     @Override
