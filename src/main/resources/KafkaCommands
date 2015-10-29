@@ -1,0 +1,12 @@
+/usr/hdp/2.3.0.0-2557/kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic task
+
+/usr/hdp/2.3.0.0-2557/kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic auditor
+
+/usr/hdp/2.3.0.0-2557/kafka/bin/kafka-console-producer.sh --broker-list sandbox.hortonworks.com:6667 --topic auditor
+
+/usr/hdp/2.3.0.0-2557/kafka/bin/kafka-console-producer.sh --broker-list sandbox.hortonworks.com:6667 --topic task
+
+/usr/hdp/2.3.0.0-2557/kafka/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic auditor --from-beginning
+
+/usr/hdp/2.3.0.0-2557/kafka/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic task --from-beginning
+
