@@ -34,11 +34,12 @@ public class AuditorServiceManager {
         }
     }
 
-    public static String startAuditor(String loggerName, String brokerList) {
+    public static String startAuditor(String loggerName, String brokerList) throws Exception {
         final Ignite ignite = ClusterManager.getIgnite();
         final AuditorService schSrvc = ignite.services().serviceProxy("DredgeAuditor", AuditorService.class, false);
 
-        schSrvc.startAuditor(loggerName, brokerList);
+        schSrvc.startProducer(loggerName, brokerList);
+        schSrvc.startConsumer();
 
         if (ignite.configuration().isClientMode()) {
             ignite.close();
@@ -50,22 +51,38 @@ public class AuditorServiceManager {
         final Ignite ignite = ClusterManager.getIgnite();
         final AuditorService schSrvc = ignite.services().serviceProxy("DredgeAuditor", AuditorService.class, false);
 
-        if (schSrvc.getAuditorStatus(loggerName).equals("Started")) {
-            schSrvc.stopAuditor(loggerName);
+        if (schSrvc.getProducerStatus(loggerName).equals("Started")) {
+            schSrvc.stopProducer(loggerName);
         }
 
+        if (schSrvc.getConsumerStatus().equals("Started")) {
+            schSrvc.stopConsumer();
+        }
         if (ignite.configuration().isClientMode()) {
             ignite.close();
         }
         return "Stopped";
     }
 
-    public static String getAuditorStatus(String loggerName) {
+    public static String getProducerStatus(String loggerName) {
         final String status;
         final Ignite ignite = ClusterManager.getIgnite();
         final AuditorService schSrvc = ignite.services().serviceProxy("DredgeAuditor", AuditorService.class, false);
 
-        status = schSrvc.getAuditorStatus(loggerName);
+        status = schSrvc.getProducerStatus(loggerName);
+
+        if (ignite.configuration().isClientMode()) {
+            ignite.close();
+        }
+        return status;
+    }
+
+    public static String geConsumerStatus(String loggerName) {
+        final String status;
+        final Ignite ignite = ClusterManager.getIgnite();
+        final AuditorService schSrvc = ignite.services().serviceProxy("DredgeAuditor", AuditorService.class, false);
+
+        status = schSrvc.getConsumerStatus();
 
         if (ignite.configuration().isClientMode()) {
             ignite.close();

@@ -1,15 +1,16 @@
 package com.dredgeplatform.dredge.auditor;
 
-import com.dredgeplatfrom.dredge.queuemanagement.KafkaUtils.MsgConsumer;
-
 public interface AuditorService {
-    void startAuditor(String loggerName, String brokerList);
+    void startProducer(String loggerName, String brokerList);
 
-    void stopAuditor(String loggerName);
+    void stopProducer(String loggerName);
 
-    String getAuditorStatus(String loggerName);
+    String getProducerStatus(String loggerName);
 
-    MsgConsumer startConsumer();
+    void startConsumer() throws Exception;
 
-    void processConsumerData(String offset, String data);
+    void stopConsumer();
+
+    String getConsumerStatus();
+
 }

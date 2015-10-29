@@ -6,15 +6,17 @@ import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dredgeplatfrom.dredge.queuemanagement.ConsumerService;
+import com.dredgeplatfrom.dredge.queuemanagement.KafkaConsumer;
 import com.dredgeplatfrom.dredge.queuemanagement.KafkaProducerLogger;
-import com.dredgeplatfrom.dredge.queuemanagement.KafkaUtils.MsgConsumer;
 
-public class AuditorServiceimpl implements Service, AuditorService {
+public class AuditorServiceimpl implements Service, AuditorService, ConsumerService {
     private static final long serialVersionUID = 1L;
     final static Logger log = LoggerFactory.getLogger(AuditorServiceimpl.class);
 
     String loggerName;
     String brokerList;
+    KafkaConsumer AuditorConsumer;
 
     public AuditorServiceimpl(String loggerName, String brokerList) {
         this.loggerName = loggerName;
@@ -30,18 +32,20 @@ public class AuditorServiceimpl implements Service, AuditorService {
     @Override
     public void execute(ServiceContext ctx) throws Exception {
         log.debug("Audtior Service Execution Started. Service Name: {}", ctx.name());
-        startAuditor(loggerName, brokerList);
+        startProducer(loggerName, brokerList);
+        startConsumer();
         log.debug("Audtior Service Execution Completed. Service Name: {}", ctx.name());
     }
 
     @Override
     public void cancel(ServiceContext ctx) {
-        stopAuditor(loggerName);
+        stopProducer(loggerName);
+        stopConsumer();
         log.debug("Auditor Service Cancelled. Service Name: {}", ctx.name());
     }
 
     @Override
-    public void startAuditor(String loggerName, String brokerList) {
+    public void startProducer(String loggerName, String brokerList) {
         final KafkaProducerLogger auditorLog = new KafkaProducerLogger();
         auditorLog.setName(loggerName);
         auditorLog.setThreshold(Level.INFO);
@@ -54,13 +58,13 @@ public class AuditorServiceimpl implements Service, AuditorService {
     }
 
     @Override
-    public void stopAuditor(String loggerName) {
+    public void stopProducer(String loggerName) {
         org.apache.log4j.Logger.getLogger(loggerName).getAppender(loggerName).close();
         org.apache.log4j.Logger.getLogger(loggerName).removeAppender(loggerName);
     }
 
     @Override
-    public String getAuditorStatus(String loggerName) {
+    public String getProducerStatus(String loggerName) {
         String status = null;
         if (org.apache.log4j.Logger.getLogger(loggerName).getAppender(loggerName) == null) {
             status = "Stopped";
@@ -71,14 +75,23 @@ public class AuditorServiceimpl implements Service, AuditorService {
     }
 
     @Override
-    public MsgConsumer startConsumer() {
-        return null;
-        // return new KafkaUtils().new MsgConsumer(this, "consumerDredgeKey");
+    public void startConsumer() throws Exception {
+        AuditorConsumer = new KafkaConsumer(this, "consumerDredgeKey");
+    }
+
+    @Override
+    public void stopConsumer() {
+        AuditorConsumer.stopConsumer();
     }
 
     @Override
     public void processConsumerData(String offset, String data) {
         System.out.println(offset + ":" + data);
+    }
+
+    @Override
+    public String getConsumerStatus() {
+        return AuditorConsumer.getConsumerStatus();
     }
 
 }
