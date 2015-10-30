@@ -43,6 +43,22 @@ public class DredgeAppStart {
         log.info("Starting Webserver Cluster: {} Nodes: {}", props.get("webserverClusterName").toString(), props.get("webserverClusterNodes").toString());
         ClusterManager.startCluster(Integer.parseInt(props.get("webserverClusterNodes").toString()), props.get("webserverClusterName").toString());
 
+        log.info("Starting Auditor Producer");
+        try {
+            ClusterManager.startAuditorProducerSerivce(props.get("auditorTopicName").toString(), props.get("kafkaBrokerList").toString());
+        } catch (final Exception e) {
+            log.error("ERROR: Starting Auditor. Message: {} Trace: {}", e.getMessage(), e.getStackTrace());
+        }
+        log.info("Auditor Producer Started");
+
+        log.info("Starting Auditor Consumer");
+        try {
+            ClusterManager.startAuditorConsumerSerivce("test");
+        } catch (final Exception e) {
+            log.error("ERROR: Starting Auditor. Message: {} Trace: {}", e.getMessage(), e.getStackTrace());
+        }
+        log.info("Auditor Consumer Started");
+
         log.info("Starting Web Server...");
         try {
             ClusterManager.startWebserverService(props.get("webserverClusterName").toString(), props.get("jettyPort").toString());
@@ -58,14 +74,6 @@ public class DredgeAppStart {
             log.error("ERROR: Starting Scheduler. Message: {} Trace: {}", e.getMessage(), e.getStackTrace());
         }
         log.info("Scheduler Server Started");
-
-        log.info("Starting Auditor");
-        try {
-            ClusterManager.startAuditorSerivce(props.get("auditorTopicName").toString(), props.get("kafkaBrokerList").toString());
-        } catch (final Exception e) {
-            log.error("ERROR: Starting Auditor. Message: {} Trace: {}", e.getMessage(), e.getStackTrace());
-        }
-        log.info("Auditor Started");
 
         log.info("Dredge Startup Completed...");
         log.info("Dredge Available @ http://localhost:" + props.get("jettyPort").toString() + "/dredge/");

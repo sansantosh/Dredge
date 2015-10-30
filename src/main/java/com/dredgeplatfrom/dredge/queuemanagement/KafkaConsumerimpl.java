@@ -16,8 +16,8 @@ import kafka.javaapi.TopicMetadataRequest;
 import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.message.MessageAndOffset;
 
-public class KafkaConsumer {
-    final static Logger log = LoggerFactory.getLogger(KafkaConsumer.class);
+public class KafkaConsumerimpl {
+    final static Logger log = LoggerFactory.getLogger(KafkaConsumerimpl.class);
 
     boolean runConsumer;
     final String topic;
@@ -27,15 +27,14 @@ public class KafkaConsumer {
     private List<String> m_replicaBrokers = new ArrayList<String>();
     ConsumerService cs;
 
-    public KafkaConsumer(ConsumerService cs, String consumerDredgeKey) throws Exception {
+    public KafkaConsumerimpl(ConsumerService cs, String consumerDredgeKey) {
         this.topic = "auditor";
         this.partition = 0;
-        this.seeds.add("192.168.0.106");
+        this.seeds.add("192.168.0.105");
         this.port = 6667;
         this.m_replicaBrokers = new ArrayList<String>();
         this.runConsumer = true;
         this.cs = cs;
-        startConsumer();
     }
 
     public void startConsumer() throws Exception {
@@ -56,6 +55,7 @@ public class KafkaConsumer {
         long readOffset = getOffset(topic, partition);
 
         while (runConsumer) {
+            log.info("Consuming Message for Auditor :" + runConsumer);
             if (consumer == null) {
                 consumer = new SimpleConsumer(leadBroker, port, 100000, 64 * 1024, clientName);
             }
@@ -83,7 +83,7 @@ public class KafkaConsumer {
 
             if (numRead == 0) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(5000);
                 } catch (final InterruptedException ie) {
                 }
             }
@@ -94,7 +94,9 @@ public class KafkaConsumer {
     }
 
     public void stopConsumer() {
+        log.info("Stopping Consuming Message for {}", topic);
         runConsumer = false;
+        log.info("Stopped Consuming Message for {}", topic);
     }
 
     public String getConsumerStatus() {

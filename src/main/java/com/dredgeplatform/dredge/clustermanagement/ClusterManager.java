@@ -20,7 +20,8 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dredgeplatform.dredge.auditor.AuditorServiceManager;
+import com.dredgeplatform.dredge.auditor.AuditorConsumerServiceManager;
+import com.dredgeplatform.dredge.auditor.AuditorProducerServiceManager;
 import com.dredgeplatform.dredge.scheduler.SchedulerServiceManager;
 import com.dredgeplatform.dredge.webserver.WebserverServiceManager;
 
@@ -94,7 +95,7 @@ public class ClusterManager {
         return "Request Executed";
     }
 
-    private static Ignite startNode(IgniteConfiguration cfg) {
+    public static Ignite startNode(IgniteConfiguration cfg) {
         log.debug("Start Node clusterAddresses " + clusterAddresses);
         final TcpDiscoverySpi spi = new TcpDiscoverySpi();
         final TcpDiscoveryVmIpFinder ipFinder = new TcpDiscoveryVmIpFinder();
@@ -184,8 +185,8 @@ public class ClusterManager {
         log.debug("Starting Schduler on Cluster: {} with Threads: {} Process Started.", clusterName, SchedulerThreads);
     }
 
-    public static void startAuditorSerivce(String loggerName, String brokerList) throws IOException {
-        log.debug("Auditor LoggerName: {} BrokerList: {}", loggerName, brokerList);
+    public static void startAuditorProducerSerivce(String loggerName, String brokerList) throws IOException {
+        log.debug("Auditor Producer LoggerName: {} BrokerList: {}", loggerName, brokerList);
         final String separator = System.getProperty("file.separator");
         final String classpath = System.getProperty("java.class.path");
         final String path = String.format("%s%sbin%sjava", System.getProperty("java.home"), separator, separator);
@@ -194,13 +195,32 @@ public class ClusterManager {
         command.add(path);
         command.add("-cp");
         command.add(classpath);
-        command.add(AuditorServiceManager.class.getName());
+        command.add(AuditorProducerServiceManager.class.getName());
         command.add(loggerName);
         command.add(brokerList);
         command.add(clusterAddresses);
-        log.debug("Starting Auditor loggerName: {} with brokerList: {} Command: {}", loggerName, brokerList, command.toString());
+        log.debug("Starting Auditor Producer loggerName: {} with brokerList: {} Command: {}", loggerName, brokerList, command.toString());
         new ProcessBuilder(command).start();
-        log.debug("Starting Auditor loggerName: {} with brokerList: {} Process Started.", loggerName, brokerList);
+        log.debug("Starting Auditor Producer loggerName: {} with brokerList: {} Process Started.", loggerName, brokerList);
+    }
+
+    public static void startAuditorConsumerSerivce(String consumerDredgeKey) throws IOException {
+        log.debug("Auditor Consumer");
+        final String separator = System.getProperty("file.separator");
+        final String classpath = System.getProperty("java.class.path");
+        final String path = String.format("%s%sbin%sjava", System.getProperty("java.home"), separator, separator);
+
+        final List<String> command = new ArrayList<String>();
+        command.add(path);
+        command.add("-cp");
+        command.add(classpath);
+        command.add(AuditorConsumerServiceManager.class.getName());
+        command.add(clusterAddresses);
+        command.add(consumerDredgeKey);
+        log.debug("Starting Auditor Consumer  Command: {}", command.toString());
+        new ProcessBuilder(command).start();
+        log.debug("Starting Auditor Consumer Process Started.");
+
     }
 
 }

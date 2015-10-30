@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dredgeplatform.dredge.auditor.AuditorConsumerServiceManager;
 import com.dredgeplatform.dredge.clustermanagement.ClusterManager;
 import com.dredgeplatform.dredge.lib.DredgeUtils;
 
@@ -34,19 +35,7 @@ public class DredgeAppStop {
         ClusterManager.clusterAddresses = props.get("clusterAddresses").toString();
 
         try {
-            // System.out.println(SchedulerServiceManager.stopScheduler(props.get("schedulerClusterName").toString()));
-        } catch (final Exception e) {
-            log.error("ERROR: Stopping Scheduler:{}. Message: {} Trace: {}", props.get("schedulerClusterName").toString(), e.getMessage(), e.getStackTrace());
-        }
-
-        try {
-            // System.out.println(WebserverServiceManager.stopWebserver(props.get("webserverClusterName").toString()));
-        } catch (final Exception e) {
-            log.error("ERROR: Stopping Webserver:{}. Message: {} Trace: {}", props.get("webserverClusterName").toString(), e.getMessage(), e.getStackTrace());
-        }
-
-        try {
-            // AuditorServiceManager.stopAuditor(props.get("auditorTopicName").toString());
+            AuditorConsumerServiceManager.stopAuditorConsumer();
         } catch (final Exception e) {
             log.error("ERROR: Stopping Auditor:{}. Message: {} Trace: {}", props.get("auditorTopicName").toString(), e.getMessage(), e.getStackTrace());
         }
